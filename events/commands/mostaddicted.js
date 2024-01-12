@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "discord.js"
-import { playtime } from "../../libs/database.js"
+import { master } from "../../libs/database.js"
 import { formatTable } from "../../libs/table.js"
 
 const create = () => {
@@ -21,7 +21,7 @@ const invoke = async (interaction) => {
     console.log(map)
 
     await interaction.deferReply()
-    const mostAddicted = playtime.prepare("SELECT Player, SUM(time)/60/60 AS 'Playtime (hours)' FROM record_playtime WHERE map = ? AND player NOT IN ('nameless tee', '(connecting)') GROUP BY player ORDER BY SUM(time) DESC LIMIT 15").all(map)
+    const mostAddicted = master.prepare("SELECT name as Player, SUM(time)/60/60 AS 'Playtime (hours)' FROM record_snapshot WHERE map = ? AND name NOT IN ('nameless tee', '(connecting)') GROUP BY name ORDER BY SUM(time) DESC LIMIT 15").all(map)
 
     if(!mostAddicted.length)
         return await interaction.followUp({

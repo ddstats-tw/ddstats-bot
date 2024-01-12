@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "discord.js"
-import { playtime } from "../../libs/database.js"
+import { master } from "../../libs/database.js"
 import { formatTable } from "../../libs/table.js"
 
 const create = () => {
@@ -19,9 +19,9 @@ const invoke = async (interaction) => {
     const player = interaction.options.getString("player")
 
     await interaction.deferReply()
-    const mostPlayedMaps = playtime.prepare("SELECT Map, SUM(time)/60/60 FROM record_playtime WHERE player = ? GROUP BY map ORDER BY sum(time) DESC LIMIT 15").all(player)
-    const totalPlaytime = playtime.prepare("SELECT SUM(time)/60/60 FROM record_playtime WHERE player = ?").all(player)
-    const mostPlayedCategories = playtime.prepare("SELECT b.Server, SUM(a.time)/60/60 FROM record_playtime AS a JOIN record_maps AS b ON a.map = b.map WHERE player = ? GROUP BY b.Server ORDER BY SUM(a.time) DESC").all(player)
+    const mostPlayedMaps = master.prepare("SELECT Map, SUM(time)/60/60 FROM record_snapshot WHERE name = ? GROUP BY map ORDER BY sum(time) DESC LIMIT 15").all(player)
+    const totalPlaytime = master.prepare("SELECT SUM(time)/60/60 FROM record_snapshot WHERE name = ?").all(player)
+    const mostPlayedCategories = master.prepare("SELECT b.Server, SUM(a.time)/60/60 FROM record_snapshot AS a JOIN record_maps AS b ON a.map = b.map WHERE name = ? GROUP BY b.Server ORDER BY SUM(a.time) DESC").all(player)
 
     if(!mostPlayedMaps.length)
         return await interaction.followUp({
