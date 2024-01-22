@@ -71,13 +71,13 @@ const invoke = async (interaction) => {
         `).all(category)
 
         return interaction.followUp({
-            content: `Showing the leaderboard for most rank1s in the ${category} category\`\`\`${formatTable(mostRank1s, ["Player", "Rank 1s"])}\`\`\``,
+            content: `Showing the leaderboard for most ${isSolo ? "rank1s" : "teamranks"} in the ${category} category\`\`\`${formatTable(mostRank1s, ["Player", isSolo ? "Rank 1s" : "Teamrank 1s"])}\`\`\``,
             ephemeral: false,
         })
     }
     if (player) {
         const teamRanked = ddnet.prepare(`
-            SELECT maps.server, IFNULL(rank1s.rank1s, 0), SUM(IFNULL(rank1s.rank1s, 0)*25)
+            SELECT maps.server, IFNULL(rank1s.rank1s, 0), IFNULL(rank1s.rank1s, 0)*25
             FROM   teamrankings AS ranks
                 JOIN maps AS maps
                     ON ranks.map = maps.map
@@ -95,7 +95,7 @@ const invoke = async (interaction) => {
             .all(player, player)
 
         const soloRanked = ddnet.prepare(`
-            SELECT maps.server, IFNULL(rank1s.rank1s, 0), SUM(IFNULL(rank1s.rank1s, 0))*25
+            SELECT maps.server, IFNULL(rank1s.rank1s, 0), IFNULL(rank1s.rank1s, 0)*25
             FROM   rankings AS ranks
                 JOIN maps AS maps
                     ON ranks.map = maps.map
@@ -104,23 +104,22 @@ const invoke = async (interaction) => {
                             FROM    rankings AS rank1s
                                     JOIN maps AS maps
                                     ON maps.map = rank1s.map
-                            WHERE  rank = 1
-                                    AND NAME = ?
+                            WHERE  rank = 1 AND name = ?
                             GROUP  BY maps.server) AS rank1s
                         ON rank1s.server = maps.server
-            WHERE  NAME = ?
+            WHERE  name = ?
             GROUP  BY maps.server ORDER  BY rank1s.rank1s DESC`)
             .all(player, player)
 
         const placementSplit = ddnet.prepare(`
-            SELECT rank, COUNT(*), SUM(points) 
-                FROM (
-                    SELECT min(rank) as rank, SUM(rankpoints.points) as points 
-                        FROM teamrankings 
-                        JOIN rankpoints ON min(rank) = rankpoints.rank
-                    WHERE name = ?
-                    GROUP BY map) 
-                GROUP BY rank;
+            SELECT rank, COUNT(*), SUM(points)
+            FROM (
+                SELECT min(teamrankings.rank) as rank, SUM(rankpoints.points) as points
+                    FROM teamrankings
+                    JOIN rankpoints ON teamrankings.rank = rankpoints.rank
+                WHERE name = ?
+                GROUP BY map)
+            GROUP BY rank;
             `)
             .all(player)
 
