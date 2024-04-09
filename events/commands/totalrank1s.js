@@ -90,7 +90,7 @@ const invoke = async (interaction) => {
                                     AND NAME = ?
                             GROUP  BY maps.server) AS rank1s
                         ON rank1s.server = maps.server
-            WHERE  NAME = ?
+            WHERE  NAME = ? AND maps.server != 'Fun'
             GROUP  BY maps.server ORDER  BY rank1s.rank1s DESC`)
             .all(player, player)
 
@@ -107,7 +107,7 @@ const invoke = async (interaction) => {
                             WHERE  rank = 1 AND name = ?
                             GROUP  BY maps.server) AS rank1s
                         ON rank1s.server = maps.server
-            WHERE  name = ?
+            WHERE  name = ? AND maps.server != 'Fun'
             GROUP  BY maps.server ORDER  BY rank1s.rank1s DESC`)
             .all(player, player)
 
