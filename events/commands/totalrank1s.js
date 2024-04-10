@@ -49,7 +49,8 @@ const invoke = async (interaction) => {
                             WHERE  rank = 1
                             GROUP  BY name) AS rank1s
                         ON teamrank1s.name = rank1s.name
-                        WHERE rank = 1
+                JOIN maps AS maps ON maps.map = teamrank1s.map
+                        WHERE rank = 1 AND AND maps.server != 'Fun'
             GROUP  BY teamrank1s.name ORDER  BY COUNT(*) DESC LIMIT 30;
         `)
             .all()
